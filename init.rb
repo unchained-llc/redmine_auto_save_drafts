@@ -2,11 +2,11 @@ require 'redmine'
 
 Redmine::Plugin.register :redmine_auto_save_drafts do
   name 'Redmine Auto Save Drafts Plugin'
-  author 'INSANEWORKS'
+  author 'UNCHAINED,LLC'
   description 'A plugin to auto-save drafts locally and restore them in Redmine tickets and comments.'
-  version '1.0.0'
-  url 'https://github.com/INSANEWORKS/redmine_auto_save_drafts'
-  author_url 'https://github.com/INSANEWORKS'
+  version '1.1.0'
+  url 'https://github.com/unchained-llc/redmine_auto_save_drafts'
+  author_url 'https://github.com/unchained-llc'
 end
 
 # Register the View Listener

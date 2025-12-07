@@ -1,7 +1,35 @@
 document.addEventListener('DOMContentLoaded', function () {
     const storageKeyPrefix = 'redmine-auto-save-drafts';
     const pageKey = location.pathname; // Add the current URL path to the key
+    const pendingKeyName = 'redmine-auto-save-drafts-pending';
     let lastSavedTime = null; // Record the last save time
+
+    // ==========================================================
+    // Handle cleanup of drafts saved before a submit
+    // (Success → remove draft, Reload/Back → keep draft)
+    // ==========================================================
+    (function cleanupPendingDraft() {
+        let raw = sessionStorage.getItem(pendingKeyName);
+        if (!raw) return;
+
+        let pending = null;
+        try { pending = JSON.parse(raw); } catch (_) {
+            sessionStorage.removeItem(pendingKeyName);
+            return;
+        }
+        sessionStorage.removeItem(pendingKeyName);
+        if (!pending || !pending.key) return;
+
+        // Navigation type (navigate / reload / back_forward)
+        let navType = "navigate";
+        try {
+            const nav = performance.getEntriesByType("navigation")[0];
+            if (nav && nav.type) navType = nav.type;
+        } catch (_) {}
+
+        const shouldDelete = (navType === "navigate");
+        if (shouldDelete) localStorage.removeItem(pending.key);
+    })();
 
     // Multi-language messages
     const messages = {
@@ -94,9 +122,12 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
 
-        // Remove saved content upon ticket submission
+        // Mark draft as "pending delete" (actual delete is on next load)
         parent.addEventListener('submit', () => {
-            localStorage.removeItem(storageKey);
+            sessionStorage.setItem(
+                pendingKeyName,
+                JSON.stringify({ key: storageKey, from: location.href })
+            );
         });
 
         // Update the save time display
